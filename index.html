@@ -1,83 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- bootstrap cdn -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-    <!-- bootstrap cdn -->
+  <title>WhatsApp Number Form</title>
 
-    <!-- phone number country code -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/css/intlTelInput.css">
-    <!-- phone number country code -->
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-
-    <link rel="stylesheet" href="./css/style.css">
-
-
-    <title>Document</title>
+  <!-- intl-tel-input CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/css/intlTelInput.min.css" />
 </head>
 <body>
 
-    <div class="container">
-        <form>
-            <div class="mb-3">
-              <label for="whatsappPhone" class="form-label">WhatsApp Number</label>
-              <input type="tel" id="whatsappPhone" name="whatsapp" class="form-control" placeholder="Enter WhatsApp number">
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-    </div>
+    <form id="whatsappForm" method="POST" action="process.php">
+        <div class="mb-3">
+          <label for="whatsappPhone" class="form-label">WhatsApp Number</label>
+          <input type="tel" id="whatsappPhone" class="form-control" placeholder="Enter WhatsApp number" />
+          <input id="numCountryCode" name="full_whatsapp" id="fullWhatsapp" />
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
 
-    
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/intlTelInput.min.js"></script>
 
-    <!-- bootstrap cdn -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
-    <!-- bootstrap cdn -->
+  <script>
+    const input = document.querySelector("#whatsappPhone");
+    const hiddenInput = document.querySelector("#fullWhatsapp");
 
-    <!-- jQuery (required by intl-tel-input) -->
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    const iti = window.intlTelInput(input, {
+        utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/utils.js",
+        nationalMode: false,
+        initialCountry: "auto",
+        geoIpLookup: callback => {
+        fetch("https://ipwho.is/")
+            .then(res => res.json())
+            .then(data => callback(data.country_code || "US"))
+            .catch(() => callback("US"));
+        },
+    });
 
-    <!-- phone number country code -->
-    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/intlTelInput.min.js"></script>
-    <!-- phone number country code -->
+    document.querySelector("#whatsappForm").addEventListener("submit", e => {
+        const fullNumber = iti.getNumber();
+        hiddenInput.value = fullNumber;
 
-    <script>
-        const input = document.querySelector("#whatsappPhone");
+        if (!iti.isValidNumber()) {
+        e.preventDefault();
 
-        const iti = window.intlTelInput(input, {
-            utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/utils.js", // make sure this is fully loaded
-            nationalMode: false, // show full international number by default
-            initialCountry: "us",
-            geoIpLookup: callback => {
-                fetch('https://ipapi.co/json')
-                    .then(res => res.json())
-                    .then(data => callback(data.country_code))
-                    .catch(() => callback('us'));
-            }
-        });
-
-
-        if (iti.isValidNumber()) {
-            console.log("Valid:", fullNumber);
-        } else {
-            console.log("Invalid number.");
+        console.log(iti.isValidNumber);
+        
+        }else{
+            console.log(iti.isValidNumber);
+            
         }
-
-        document.querySelector('form').addEventListener('submit', e => {
-            e.preventDefault();
-            const fullNumber = iti.getNumber();
-
-            // Validate if number is not empty
-            if (fullNumber && fullNumber.length > 0) {
-                console.log("✅ Full WhatsApp Number:", fullNumber);
-            } else {
-                console.log("⚠️ Please enter a valid number.");
-            }
-        });
-
-    </script>
+    });
+  </script>
 
 </body>
 </html>
